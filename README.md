@@ -1,1 +1,1 @@
-# ProjectB58
+# CSCB58: Project
