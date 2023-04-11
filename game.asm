@@ -14,7 +14,7 @@
 #
 # Which milestones have been reached in this submission?
 # (See the assignment handout for descriptions of the milestones)
-# - Milestone 1/2/3 (choose the one the applies)
+# - Milestone 3
 #
 # Which approved features have been implemented for milestone 3?
 # (See the assignment handout for the list of additional features)
@@ -26,13 +26,15 @@
 # 6. K - Double Jump
 #
 # Link to video demonstration for final submission:
-# - 
+# - https://youtu.be/X-bKcF4vhAg
 #
 # Are you OK with us sharing the video with people outside course staff?
 # - yes, *https://github.com/faizannaseerr/ProjectB58*
 #
 # Any additional information that the TA needs to know:
-# - N/A
+# - Score is shown as 1 M (minute) survived in the win screen.
+# - To do your second jump, your first jump should be on a platform.
+# - The platforms are there to aid survival.
 #
 #####################################################################
 
@@ -40,10 +42,8 @@
 .eqv	floor_colour 0x008000
 
 #stones as obstacles, level bar at the top
-#s1-s9 for caller, t1-t9 for callee
 .data
 
-disapp_flag: .word 0
 disapp_timer: .word 0
 score: .word 0
 
@@ -81,12 +81,12 @@ main_loop:	jal rock_loop
 		beq $t8, 1, keypress  
 		
 		jal platform_check #gravity
-		#jal contact_check #fail-condition	
+		jal contact_check #fail-condition	
 		
 
 main_sleep:	#sw $t1, 504($t0)
 		li $v0, 32
-		li $a0, 75 #frame rate
+		li $a0, 20 #frame rate
 		syscall
 	
 		j main_loop
@@ -304,6 +304,28 @@ game_won:	jal clear_board
 		sw $t2, 1024($t4)
 		sw $t2, 1280($t4)
 		
+		addi $t4, $t4, -5148
+		#:)
+		sw $t2, 0($t4)
+		sw $t2, 256($t4)
+		#sw $t2, 512($t4)
+		sw $t2, 8($t4)
+		sw $t2, 264($t4)
+		#sw $t2, 520($t4)
+		addi $t4, $t4, 1024
+		sw $t2, -524($t4)
+		sw $t2, -264($t4)
+		sw $t2, -4($t4)
+		sw $t2, 256($t4)
+		sw $t2, 260($t4)
+		sw $t2, 264($t4)
+		sw $t2, 12($t4)
+		sw $t2, -240($t4)
+		sw $t2, -492($t4)
+		
+		
+		
+		
 		j end
 		
 create_level_bar:
@@ -480,25 +502,15 @@ create_disapp:	li $t1, 0x7e91a0
 		
 disapp_loop:	la $t3, disapp_timer
 		lw $t4, 0($t3)
-		bne $t4, 1000, end_disapp_loop
-reset_flag:	li $t4, 0
+		addi $t4, $t4, 1
 		sw $t4, 0($t3)
-		la $t3, disapp_flag
-		sw $t4, ($t3)
-		j recreate
-		la $t3, disapp_flag
-		lw $t4, 0($t3)
-		beq $t4, 1, disapp_update
-		addi $t7, $a1, 0
-		li $v0, 42
-		li $a0, 0
-		li $a1, 100
-		syscall
-		addi $a1, $t7, 0
+		bgt $t4, 260, clear_disapp
+		bgt $4, 520, recreate
+		j end_disapp_loop
 		
-		blt $a0, 6, clear_disapp
-		li $t1, 0x7e91a0
-recreate:	addi $t2, $t0, 12288 #5376 #address for level
+
+recreate:	li $t1, 0x7e91a0
+		addi $t2, $t0, 9984 #5376 #address for level
 		sw $t1, 0($t2)
 		sw $t1, 4($t2)
 		sw $t1, 8($t2)
@@ -507,19 +519,11 @@ recreate:	addi $t2, $t0, 12288 #5376 #address for level
 		sw $t1, 20($t2)
 		sw $t1, 24($t2)
 		
-disapp_update:	la $t3, disapp_timer
-		lw $t4, 0($t3)
-		addi $t4, $t4, 1
-		sw $t4, 0($t3)
-		
 end_disapp_loop:		
 		jr $ra
 
-clear_disapp:	la $t3, disapp_flag
-		li $t4, 1
-		sw $t4, 0($t3)
-		li $t1, 0x000000
-		addi $t2, $t0, 12288 #5376 #address for level
+clear_disapp:	li $t1, 0x000000
+		addi $t2, $t0, 9984 #5376 #address for level
 		sw $t1, 0($t2)
 		sw $t1, 4($t2)
 		sw $t1, 8($t2)
@@ -1026,3 +1030,4 @@ game_over:	jal clear_board
 		
 		#doing (3) rn i think so
 		# turn it into 512x512!!!!!! - first priority - done
+		
